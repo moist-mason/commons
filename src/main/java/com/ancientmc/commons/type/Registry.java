@@ -3,11 +3,9 @@ package com.ancientmc.commons.type;
 import com.ancientmc.commons.Util;
 import org.jspecify.annotations.NonNull;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * A registry, in this library, is a map-like object with string keys.
@@ -27,8 +25,38 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     /** The entry set. Since this is a set, all entries in the registry are unique. */
     private final Set<Entry<T>> entries;
 
-    public Registry() {
-        this.entries = new HashSet<>();
+    /** The keys in this registry. */
+    private final Set<String> keys;
+
+    /** The values in this registry. */
+    private final List<T> values;
+
+    private Registry() {
+        this.entries = new LinkedHashSet<>();
+        this.keys = new LinkedHashSet<>();
+        this.values = new LinkedList<>();
+    }
+
+    /**
+     * Creates an empty registry.
+     *
+     * @return The registry.
+     * @param <T> The registry value type.
+     */
+    public static <T> Registry<T> create() {
+        return new Registry<>();
+    }
+
+    /**
+     * Creates a registry with predefined values fed into a consumer.
+     *
+     * @return The registry.
+     * @param <T> The registry value type.
+     */
+    public static <T> Registry<T> create(final Consumer<? super Registry<T>> consumer) {
+        final Registry<T> registry = new Registry<>();
+        consumer.accept(registry);
+        return registry;
     }
 
     /**
@@ -41,6 +69,8 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     public T register(final String key, final T value) {
         final Entry<T> entry = new Entry<>(key, value);
         entries.add(entry);
+        keys.add(key);
+        values.add(value);
         return value;
     }
 
@@ -53,6 +83,8 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     public T unregister(final String key) {
         final Entry<T> entry = Util.get(getEntry(key));
         entries.remove(entry);
+        keys.remove(key);
+        values.remove(entry.value());
         return entry.value();
     }
 
@@ -118,6 +150,34 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
         return Util.anyMatch(entries, e -> e.value().equals(value));
     }
 
+    /**
+     * Gets the keys of the registry as a set.
+     *
+     * @return The key set.
+     */
+    public Set<String> keys() {
+        return keys;
+    }
+
+    /**
+     * Gets the values of the registry as a list.
+     *
+     * @return The value list.
+     */
+    public List<T> values() {
+        return values;
+    }
+
+    /**
+     * Gets the index of this value.
+     *
+     * @param value The value.
+     * @return The index.
+     */
+    public int indexOf(final T value) {
+        return values().indexOf(value);
+    }
+
     /** @return The size of the registry. */
     public int size() {
         return entries.size();
@@ -143,6 +203,15 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     @Override
     public void forEach(Consumer<? super Entry<T>> action) {
         Iterable.super.forEach(action);
+    }
+
+    /**
+     * Gets a stream of this registry's values.
+     *
+     * @return The stream.
+     */
+    public Stream<T> stream() {
+        return values().stream();
     }
 
     /**

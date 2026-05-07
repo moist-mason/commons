@@ -48,6 +48,16 @@ public final class StringUtil {
     }
 
     /**
+     * Joins the input strings together with line breaks in between.
+     *
+     * @param inputs The strings.
+     * @return The joined strings.
+     */
+    public static String lines(final String... inputs) {
+        return String.join("\n", inputs);
+    }
+
+    /**
      * Surrounds the input string with square brackets [].
      *
      * @param inputs The string.

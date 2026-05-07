@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.ancientmc'
-version = '0.1.0-snapshot-2'
+version = '0.1.0-snapshot-3'
 
 java {
     withSourcesJar()

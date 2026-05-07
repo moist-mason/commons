@@ -123,7 +123,7 @@ public final class FileUtil {
     @Internal
     public static void copyDirectoryToDirectory(final Path input, final Path output) throws IOException {
         createDirectory(output);
-        Path copiedDir = output.resolve(getName(input));
+        final Path copiedDir = output.resolve(getName(input));
         copyDirectoryTree(input, copiedDir);
     }
 
@@ -143,8 +143,8 @@ public final class FileUtil {
         final DirectoryTree tree = DirectoryTree.walk(input, inclusions);
 
         for (Path path : tree) {
-            Path relative = input.relativize(path);
-            Path copy = output.resolve(relative);
+            final Path relative = input.relativize(path);
+            final Path copy = output.resolve(relative);
             Files.copy(path, copy);
         }
     }
@@ -247,7 +247,7 @@ public final class FileUtil {
     public static boolean isIncluded(final Path path, final String... inclusions) {
         if (inclusions.length == 0) return true;
 
-        List<PathMatcher> matchers = Arrays.stream(inclusions)
+        final List<PathMatcher> matchers = Arrays.stream(inclusions)
                 .map(s -> "glob:" + s)
                 .map(FileSystems.getDefault()::getPathMatcher)
                 .toList();
@@ -274,12 +274,12 @@ public final class FileUtil {
      * @throws IOException exception.
      */
     public static void compressZip(final DirectoryTree tree, final Path output) throws IOException {
-        try (ZipArchiveOutputStream zip = new ZipArchiveOutputStream(output)) {
+        try (final ZipArchiveOutputStream zip = new ZipArchiveOutputStream(output)) {
             for (Path path : tree) {
                 final Path relative = tree.relativize(path);
 
                 // Ensure directories are defined as such in the entry name. Otherwise, empty files with the directory names get created.
-                String entry = relative + (isDirectory(path) ? "/" : "");
+                final String entry = relative + (isDirectory(path) ? "/" : "");
                 zip.putArchiveEntry(new ZipArchiveEntry(entry));
                 zip.closeArchiveEntry();
             }
@@ -308,7 +308,7 @@ public final class FileUtil {
                 } else {
                     createParentDirectory(entryPath);
 
-                    try (OutputStream out = Files.newOutputStream(entryPath)) {
+                    try (final OutputStream out = Files.newOutputStream(entryPath)) {
                         IOUtils.copy(zin, out);
                     }
                 }

@@ -355,7 +355,7 @@ public final class Util {
      * @param <X> The exception type.
      */
     public static <X extends Exception> X exception(final ExceptionFactory<X> factory, final String template, final Object... args) {
-        String message = String.format(template, args);
+        final String message = String.format(template, args);
         return exception(factory, message);
     }
 
@@ -389,10 +389,10 @@ public final class Util {
      * @param ext The file extension of the artifact.
      * @return The maven URL.
      */
-    public static URL toMavenUrl(String repo, String path, String ext) {
-        String[] split = path.split(":");
-        String file = split[1] + "-" + split[2] + (split.length > 3 ? "-" + split[3] : "") + "." + ext;
-        String newPath = split[0].replace('.', '/') + "/" + split[1] + "/" + split[2] + "/" + file;
+    public static URL toMavenUrl(final String repo, final String path, final String ext) {
+        final String[] split = path.split(":");
+        final String file = split[1] + "-" + split[2] + (split.length > 3 ? "-" + split[3] : "") + "." + ext;
+        final String newPath = split[0].replace('.', '/') + "/" + split[1] + "/" + split[2] + "/" + file;
         return URL.apply(repo + newPath);
     }
 
@@ -423,17 +423,14 @@ public final class Util {
         public static Os current() {
             final String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
-            // Somewhat similar to NeoFormRuntime, OsType.java
-            // in turn similar to Apache Commons Lang 3, SystemUtils.java
-            if (LINUX.contains(osName)) {
-                return LINUX;
-            } else if (MACOS.contains(osName)) {
-                return MACOS;
-            } else if (WINDOWS.contains(osName)) {
-                return WINDOWS;
-            } else {
-                return UNKNOWN;
+            // Inspired by NeoGradle, net.neoforged.gradle.common.util.VersionJson.java
+            for (Os os : values()) {
+                if (os.contains(osName)) {
+                    return os;
+                }
             }
+
+            return UNKNOWN;
         }
 
         /** @return The primary name of the OS. */
@@ -446,6 +443,13 @@ public final class Util {
             return additionalNames;
         }
 
+        /** @return All known names of the OS. */
+        public List<String> getAllNames() {
+            List<String> list = new ArrayList<>(Arrays.asList(additionalNames));
+            list.addFirst(name);
+            return list;
+        }
+
         /**
          * Checks if the input contains any of the OS names.
          *
@@ -453,7 +457,7 @@ public final class Util {
          * @return {@code true} if the input contains any of the OS names.
          */
         private boolean contains(final String input) {
-            return input.contains(name) || StringUtil.containsAny(additionalNames, input);
+            return StringUtil.containsAny(getAllNames(), input);
         }
     }
 
