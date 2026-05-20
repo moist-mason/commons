@@ -1,6 +1,7 @@
-package com.ancientmc.commons.type;
+package com.github.moistmason.commons.type;
 
-import com.ancientmc.commons.Util;
+import com.github.moistmason.commons.Util;
+import com.mojang.serialization.Codec;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -8,9 +9,9 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * A registry, in this library, is a map-like object with string keys.
+ * A dictionary, in this library, is a map-like object with string keys.
  * This is useful for sorting through collections of immutable objects.
- * This is a ridiculously simplified version of Minecraft's own registry system that handles objects in the game.
+ * This is a ridiculously simplified version of Minecraft's registry system that handles objects in the game.
  *
  * <p> See also:
  * <a href="https://docs.neoforged.net/docs/concepts/registries/">Minecraft registry documentation, provided by NeoForged.</a>
@@ -18,49 +19,76 @@ import java.util.stream.Stream;
  *
  * @author moist-mason
  *
- * @param <T> The registry type.
+ * @param <T> The dictionary type.
  */
-public class Registry<T> implements Iterable<Registry.Entry<T>> {
+public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
 
-    /** The entry set. Since this is a set, all entries in the registry are unique. */
+    /**
+     * Codec representation of a dictionary.
+     *
+     * @param valueCodec The codec of the dictionary's value type.
+     * @return The codec.
+     * @param <T> The value type.
+     */
+    public static <T> Codec<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
+        return Codec.unboundedMap(Codec.STRING, valueCodec).xmap(Dictionary::fromMap, Dictionary::toMap);
+    }
+
+    /** The entry set. Since this is a set, all entries in the dictionary are unique. */
     private final Set<Entry<T>> entries;
 
-    /** The keys in this registry. */
+    /** The keys in this dictionary. */
     private final Set<String> keys;
 
-    /** The values in this registry. */
+    /** The values in this dictionary. */
     private final List<T> values;
 
-    private Registry() {
+    private Dictionary() {
         this.entries = new LinkedHashSet<>();
         this.keys = new LinkedHashSet<>();
         this.values = new LinkedList<>();
     }
 
     /**
-     * Creates an empty registry.
+     * Creates an empty dictionary.
      *
-     * @return The registry.
-     * @param <T> The registry value type.
+     * @return The dictionary.
+     * @param <T> The dictionary value type.
      */
-    public static <T> Registry<T> create() {
-        return new Registry<>();
+    public static <T> Dictionary<T> create() {
+        return new Dictionary<>();
     }
 
     /**
-     * Creates a registry with predefined values fed into a consumer.
+     * Creates a dictionary with predefined values fed into a consumer.
      *
-     * @return The registry.
-     * @param <T> The registry value type.
+     * @param consumer The consumer.
+     * @return The dictionary.
+     * @param <T> The dictionary value type.
      */
-    public static <T> Registry<T> create(final Consumer<? super Registry<T>> consumer) {
-        final Registry<T> registry = new Registry<>();
-        consumer.accept(registry);
-        return registry;
+    public static <T> Dictionary<T> create(final Consumer<? super Dictionary<T>> consumer) {
+        final Dictionary<T> dictionary = new Dictionary<>();
+        consumer.accept(dictionary);
+        return dictionary;
     }
 
     /**
-     * Adds an entry to the registry.
+     * Creates a dictionary from a map. Meant for codec creation but can be used on its own.
+     *
+     * @param map The map.
+     * @return The dictionary.
+     * @param <T> The dictionary value type.
+     */
+    public static <T> Dictionary<T> fromMap(final Map<String, T> map) {
+        return Dictionary.create(dict -> {
+            for (Map.Entry<String, T> entry : map.entrySet()) {
+                dict.register(entry.getKey(), entry.getValue());
+            }
+        });
+    }
+
+    /**
+     * Adds an entry to the dictionary.
      *
      * @param key The key.
      * @param value The value.
@@ -75,7 +103,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Removes an entry from the registry.
+     * Removes an entry from the dictionary.
      *
      * @param key The key.
      * @return The value.
@@ -111,7 +139,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Checks if an entry with the given key is in the registry.
+     * Checks if an entry with the given key is in the dictionary.
      *
      * @param key The key.
      * @return The entry, if present.
@@ -121,7 +149,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Checks if an entry with the given value is in the registry.
+     * Checks if an entry with the given value is in the dictionary.
      *
      * @param value The value.
      * @return The entry, if present.
@@ -131,27 +159,27 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Checks if the registry contains an entry with the given key.
+     * Checks if the dictionary contains an entry with the given key.
      *
      * @param key The key.
-     * @return {@code true} if the registry has an entry with the key.
+     * @return {@code true} if the dictionary has an entry with the key.
      */
     public boolean containsKey(final String key) {
         return Util.anyMatch(entries, e -> e.key.equals(key));
     }
 
     /**
-     * Checks if the registry contains an entry with the given value.
+     * Checks if the dictionary contains an entry with the given value.
      *
      * @param value The value.
-     * @return {@code true} if the registry has an entry with the value.
+     * @return {@code true} if the dictionary has an entry with the value.
      */
     public boolean containsValue(final T value) {
         return Util.anyMatch(entries, e -> e.value().equals(value));
     }
 
     /**
-     * Gets the keys of the registry as a set.
+     * Gets the keys of the dictionary as a set.
      *
      * @return The key set.
      */
@@ -160,7 +188,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Gets the values of the registry as a list.
+     * Gets the values of the dictionary as a list.
      *
      * @return The value list.
      */
@@ -178,7 +206,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
         return values().indexOf(value);
     }
 
-    /** @return The size of the registry. */
+    /** @return The size of the dictionary. */
     public int size() {
         return entries.size();
     }
@@ -187,10 +215,10 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     public boolean equals(final Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof Registry<?> registry)) {
+        if (!(o instanceof Dictionary<?> dictionary)) {
             return false;
         } else {
-            return entries.equals(registry.entries);
+            return entries.equals(dictionary.entries);
         }
     }
 
@@ -206,7 +234,7 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
     }
 
     /**
-     * Gets a stream of this registry's values.
+     * Gets a stream of this dictionary's values.
      *
      * @return The stream.
      */
@@ -214,8 +242,18 @@ public class Registry<T> implements Iterable<Registry.Entry<T>> {
         return values().stream();
     }
 
+    public Map<String, T> toMap() {
+        final HashMap<String, T> map = new HashMap<>();
+
+        for (final Entry<T> entry : entries) {
+            map.put(entry.key(), entry.value());
+        }
+
+        return map;
+    }
+
     /**
-     * An entry in the registry. Similar to {@link Map.Entry}.
+     * An entry in the dictionary. Similar to {@link Map.Entry}.
      *
      * @param key The key.
      * @param value The value.

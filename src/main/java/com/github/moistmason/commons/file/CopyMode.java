@@ -1,4 +1,4 @@
-package com.ancientmc.commons.file;
+package com.github.moistmason.commons.file;
 
 import java.nio.file.Path;
 

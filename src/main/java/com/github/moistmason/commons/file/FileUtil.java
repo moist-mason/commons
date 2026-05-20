@@ -1,7 +1,7 @@
-package com.ancientmc.commons.file;
+package com.github.moistmason.commons.file;
 
-import com.ancientmc.commons.Util;
-import com.ancientmc.commons.annotation.Internal;
+import com.github.moistmason.commons.Util;
+import com.github.moistmason.commons.annotation.Internal;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;

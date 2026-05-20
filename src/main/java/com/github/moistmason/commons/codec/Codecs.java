@@ -1,6 +1,7 @@
-package com.ancientmc.commons.codec;
+package com.github.moistmason.commons.codec;
 
-import com.ancientmc.commons.Util;
+import com.github.moistmason.commons.Util;
+import com.github.moistmason.commons.type.Dictionary;
 import com.mojang.datafixers.util.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -9,6 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -51,6 +53,14 @@ public final class Codecs {
             return DataResult.success(Path.of(address));
         } catch (final InvalidPathException e) {
             return DataResult.error(() -> "Invalid Path address: " + address);
+        }
+    }
+
+    private static <T> DataResult<Map<String, T>> checkMapFromDictionary(final Dictionary<T> dictionary) {
+        try {
+            return DataResult.success(dictionary.toMap());
+        } catch (final NullPointerException e) {
+            return DataResult.error(() -> "Invalid Dictionary: " + dictionary);
         }
     }
 

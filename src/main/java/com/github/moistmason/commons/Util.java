@@ -1,5 +1,6 @@
-package com.ancientmc.commons;
+package com.github.moistmason.commons;
 
+import com.github.moistmason.commons.type.SerializableEnum;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
@@ -49,6 +50,10 @@ public final class Util {
      */
     public static <T> T get(final @NonNull T value) {
         return Optional.of(value).orElseThrow();
+    }
+
+    public static <T> T getOrDefault(final T value, final T defaultValue) {
+        return Optional.ofNullable(value).orElse(defaultValue);
     }
 
     /**
@@ -402,7 +407,7 @@ public final class Util {
     }
 
     /** Enum representation of the current OS. */
-    public enum Os {
+    public enum Os implements SerializableEnum {
         LINUX("linux", "debian", "ubuntu", "mint", "arch", "fedora", "zorin"),
         MACOS("osx", "mac", "os x"),
         WINDOWS("windows", "win"),
@@ -435,6 +440,11 @@ public final class Util {
 
         /** @return The primary name of the OS. */
         public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getSerializedName() {
             return name;
         }
 

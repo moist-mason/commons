@@ -1,4 +1,4 @@
-package com.ancientmc.commons.annotation;
+package com.github.moistmason.commons.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

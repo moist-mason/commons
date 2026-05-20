@@ -1,7 +1,7 @@
-package com.ancientmc.commons.test;
+package com.github.moistmason.commons.test;
 
-import com.ancientmc.commons.file.CopyMode;
-import com.ancientmc.commons.file.FileUtil;
+import com.github.moistmason.commons.file.CopyMode;
+import com.github.moistmason.commons.file.FileUtil;
 
 import java.io.IOException;
 import java.net.URL;

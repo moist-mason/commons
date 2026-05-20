@@ -1,6 +1,6 @@
-package com.ancientmc.commons.test;
+package com.github.moistmason.commons.test;
 
-import com.ancientmc.commons.file.CopyMode;
+import com.github.moistmason.commons.file.CopyMode;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.function.Function;
 
-import static com.ancientmc.commons.Util.URL;
+import static com.github.moistmason.commons.Util.URL;
 
 public class CommonTests {
     private static final Path DATA_PATH = Path.of("data");

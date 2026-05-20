@@ -1,7 +1,7 @@
-package com.ancientmc.commons;
+package com.github.moistmason.commons;
 
-import com.ancientmc.commons.type.Pair;
-import com.ancientmc.commons.type.Triple;
+import com.github.moistmason.commons.type.Pair;
+import com.github.moistmason.commons.type.Triple;
 
 import java.util.*;
 

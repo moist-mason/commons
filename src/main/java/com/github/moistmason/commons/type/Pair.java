@@ -1,4 +1,4 @@
-package com.ancientmc.commons.type;
+package com.github.moistmason.commons.type;
 
 /**
  * Basic implementation of an immutable pair object.

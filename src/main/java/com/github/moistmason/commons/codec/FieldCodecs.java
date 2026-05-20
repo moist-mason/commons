@@ -1,4 +1,4 @@
-package com.ancientmc.commons.codec;
+package com.github.moistmason.commons.codec;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
