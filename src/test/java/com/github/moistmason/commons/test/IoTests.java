@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import static com.github.moistmason.commons.Util.URL;
 
-public class CommonTests {
+public class IoTests {
     private static final Path DATA_PATH = Path.of("data");
     private static final Function<String, Path> PATH = DATA_PATH::resolve;
 

@@ -29,7 +29,7 @@ public interface SerializableEnum {
     @Nullable String getSerializedName();
 
     /**
-     * Creates a codec using the values of an enum class.
+     * Creates a codec based on the provided values of an enum class.
      *
      * @param values The values. of the enum.
      * @return The codec.
@@ -70,7 +70,14 @@ public interface SerializableEnum {
         };
     }
 
+    /**
+     * A codec representing enum constants, serialized as a string.
+     *
+     * @param <E> The enum type.
+     */
     class EnumCodec<E extends Enum<E> & SerializableEnum> implements Codec<E> {
+
+        /** The internal codec type used for serializing/deserializing. */
         private final Codec<E> codec;
 
         public EnumCodec(final Function<String, E> enumResolver) {

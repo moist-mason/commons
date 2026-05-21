@@ -1,8 +1,5 @@
 package com.github.moistmason.commons;
 
-import com.github.moistmason.commons.type.Pair;
-import com.github.moistmason.commons.type.Triple;
-
 import java.util.*;
 
 /**
@@ -112,19 +109,6 @@ public final class StringUtil {
     }
 
     /**
-     * {@link Object#toString} formatter for normal values.
-     * This method shows the type of object, followed by the components normally found in a {@link Object#toString} call.
-     *
-     * @param value The object value.
-     * @param components The components of that value as normally found in a {@link Object#toString} call.
-     * @return The formatted string.
-     * @param <T> The type.
-     */
-    public static <T> String toString(final T value, final String components) {
-        return toStringType(value) + " -> " + components;
-    }
-
-    /**
      * {@link Object#toString} formatter for arrays.
      * This method shows that this is an array of the given type. 
      * It then displays the values in the array formatted via {@link Arrays#toString(Object[])}.
@@ -134,7 +118,7 @@ public final class StringUtil {
      * @param <T> The array type.
      */
     public static <T> String toString(final T[] array) {
-        return toStringType(array) + " -> " + Arrays.toString(array);
+        return arrayPrefix(array) + " -> " + Arrays.toString(array);
     }
 
     /**
@@ -165,16 +149,16 @@ public final class StringUtil {
     }
 
     /**
-     * {@link Object#toString} formatter for enums.
+     * {@link Object#toString} formatter for enum classes.
      * This method shows the declaring enum class.
-     * It then displays the entries of the map formatted via {@link StringUtil#enumConstants(Enum)}.
+     * It then displays the constants formatted via {@link StringUtil#enumConstants(Class)}.
      *
-     * @param enumeration The enum.
+     * @param enumClass The enum class.
      * @return The formatted string.
      * @param <T> The enum type.
      */
-    public static <T extends Enum<T>> String toString(final Enum<T> enumeration) {
-        return enumPrefix(enumeration) + " -> " + enumConstants(enumeration);
+    public static <T extends Enum<T>> String toString(final Class<T> enumClass) {
+        return enumPrefix(enumClass) + " -> " + enumConstants(enumClass);
     }
 
     /**
@@ -211,44 +195,12 @@ public final class StringUtil {
     /**
      * Formats the constants in an enum class as an array with {@link Arrays#toString(Object[])}.
      *
-     * @param enumeration The enum.
+     * @param enumClass The enum.
      * @return The formatted string.
      * @param <T> The enum type.
      */
-    private static <T extends Enum<T>> String enumConstants(final Enum<T> enumeration) {
-        return Arrays.toString(enumeration.getDeclaringClass().getEnumConstants());
-    }
-
-    /**
-     * Formats the type information for a provided value.
-     * 
-     * @param value The value.
-     * @return The formatted type information.
-     * @param <T> The type.
-     */
-    private static <T> String toStringType(final T value) {
-        String prefix = "";
-
-        if (value instanceof Collection<?>) {
-            prefix = collectionPrefix((Collection<?>) value);
-        } else if (value instanceof Map<?, ?>) {
-            prefix = mapPrefix((Map<?,?>) value);
-        } else if (value instanceof Enum<?>) {
-            prefix = enumPrefix((Enum<?>) value);
-        } else if (value instanceof Pair<?,?>) {
-            prefix = pairPrefix((Pair<?, ?>) value);
-        } else if (value instanceof Triple<?, ?, ?>) {
-            prefix = triplePrefix((Triple<?, ?, ?>) value);
-        }
-
-        String valueType = Util.get(
-                !value.getClass().isAnonymousClass(),
-                typeName(value),
-                Util.illegalArgException(
-                        "Class %s of value %s is anonymous and has no simple name.", value.getClass().toString(), value)
-        );
-
-        return spaced(prefix, valueType);
+    private static <T extends Enum<T>> String enumConstants(final Class<T> enumClass) {
+        return Arrays.toString(enumClass.getEnumConstants());
     }
 
     /**
@@ -258,8 +210,8 @@ public final class StringUtil {
      * @return The formatted type information.
      * @param <T> The array type.
      */
-    private static <T> String toStringType(final T[] array) {
-        return spaced("Array of type", typeName(array.getClass().getComponentType()));
+    private static <T> String arrayPrefix(final T[] array) {
+        return spaced("Array of Type:", typeName(array.getClass().getComponentType()));
     }
 
     /**
@@ -274,7 +226,7 @@ public final class StringUtil {
         return spaced(
                 simpleName(collection),
                 "of Type:",
-                toStringType(collection.toArray().getClass().getComponentType().getTypeName())
+                typeName(collection)
         );
     }
 
@@ -299,44 +251,12 @@ public final class StringUtil {
      * Formats the type information of an enum. 
      * Shows the declaring class for this enum.
      *
-     * @param enumeration The map.
+     * @param enumClass The enum class.
      * @return The formatted type information.
      * @param <T> The enum type.
      */
-    private static <T extends Enum<T>> String enumPrefix(final Enum<T> enumeration) {
-        return "Enum " + typeName(enumeration.getDeclaringClass());
-    }
-
-    /**
-     * Formats the type information of a {@link Pair}.
-     *
-     * @param pair The pair.
-     * @return The formatted type information.
-     * @param <L> The left type.
-     * @param <R> The right type.
-     */
-    private static <L, R> String pairPrefix(final Pair<L, R> pair) {
-        return spaced("Pair ->",
-                "with Left Type:", typeName(pair.left()),
-                "and Right Type:", typeName(pair.right())
-        );
-    }
-
-    /**
-     * Formats the type information of a {@link Triple}.
-     *
-     * @param triple The triple.
-     * @return The formatted type information.
-     * @param <L> The left type.
-     * @param <M> The middle type.
-     * @param <R> The right type.
-     */
-    private static <L, M, R> String triplePrefix(final Triple<L, M, R> triple) {
-        return spaced("Triple ->",
-                "with Left Type:", typeName(triple.left()),
-                "and Middle Type", typeName(triple.middle()),
-                "and Right Type",  typeName(triple.right())
-        );
+    private static <T extends Enum<T>> String enumPrefix(final Class<T> enumClass) {
+        return "Enum " + typeName(enumClass);
     }
 
     /**
@@ -350,13 +270,25 @@ public final class StringUtil {
     }
 
     /**
-     * Gets the class name of this value's type. Used for more specific types.
+     * Gets the type name of this value.
+     *
      * @param value The value.
-     * @return The class name.
+     * @return The type name.
      * @param <T> The type.
      */
-    private static <T> String typeName(final T value) {
+    public static <T> String typeName(final T value) {
         return value.getClass().getTypeName();
+    }
+
+    /**
+     * Gets the type name of this collection, by checking the type of the first value.
+     *
+     * @param collection The collection.
+     * @return The type name.
+     * @param <T> The type.
+     */
+    public static <T> String typeName(final Collection<T> collection) {
+        return collection.stream().findFirst().map(StringUtil::typeName).orElseThrow();
     }
 
     /**
@@ -365,7 +297,7 @@ public final class StringUtil {
      * @return The class name.
      * @param <T> The type.
      */
-    private static <T> String typeName(final Class<T> value) {
+    public static <T> String typeName(final Class<T> value) {
         return value.getTypeName();
     }
 }

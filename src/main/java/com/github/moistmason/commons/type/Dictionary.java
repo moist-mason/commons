@@ -1,17 +1,19 @@
 package com.github.moistmason.commons.type;
 
+import com.github.moistmason.commons.StringUtil;
 import com.github.moistmason.commons.Util;
 import com.mojang.serialization.Codec;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * A dictionary, in this library, is a map-like object with string keys.
  * This is useful for sorting through collections of immutable objects.
- * This is a ridiculously simplified version of Minecraft's registry system that handles objects in the game.
+ * This was inspired Minecraft's registry system that handles objects in the game.
  *
  * <p> See also:
  * <a href="https://docs.neoforged.net/docs/concepts/registries/">Minecraft registry documentation, provided by NeoForged.</a>
@@ -30,7 +32,7 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
      * @return The codec.
      * @param <T> The value type.
      */
-    public static <T> Codec<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
+    public static <T> Codec<Dictionary<T>> codec(final Codec<T> valueCodec) {
         return Codec.unboundedMap(Codec.STRING, valueCodec).xmap(Dictionary::fromMap, Dictionary::toMap);
     }
 
@@ -73,7 +75,7 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
     }
 
     /**
-     * Creates a dictionary from a map. Meant for codec creation but can be used on its own.
+     * Creates a dictionary from a map.
      *
      * @param map The map.
      * @return The dictionary.
@@ -82,7 +84,7 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
     public static <T> Dictionary<T> fromMap(final Map<String, T> map) {
         return Dictionary.create(dict -> {
             for (Map.Entry<String, T> entry : map.entrySet()) {
-                dict.register(entry.getKey(), entry.getValue());
+                dict.add(entry.getKey(), entry.getValue());
             }
         });
     }
@@ -94,7 +96,7 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
      * @param value The value.
      * @return The value.
      */
-    public T register(final String key, final T value) {
+    public T add(final String key, final T value) {
         final Entry<T> entry = new Entry<>(key, value);
         entries.add(entry);
         keys.add(key);
@@ -108,7 +110,7 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
      * @param key The key.
      * @return The value.
      */
-    public T unregister(final String key) {
+    public T remove(final String key) {
         final Entry<T> entry = Util.get(getEntry(key));
         entries.remove(entry);
         keys.remove(key);
@@ -239,17 +241,37 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
      * @return The stream.
      */
     public Stream<T> stream() {
-        return values().stream();
+        return values.stream();
     }
 
+    /**
+     * Gets a stream of this dictionary's entries.
+     *
+     * @return The stream.
+     */
+    public Stream<Entry<T>> entryStream() {
+        return entries.stream();
+    }
+
+    /**
+     * Converts this dictionary to a regular map.
+     *
+     * @return The map.
+     */
     public Map<String, T> toMap() {
-        final HashMap<String, T> map = new HashMap<>();
+        return entries.stream().collect(Collectors.toMap(Entry::key, Entry::value));
+    }
 
-        for (final Entry<T> entry : entries) {
-            map.put(entry.key(), entry.value());
-        }
+    @Override
+    public String toString() {
+        final String[] entriesArray = entries.stream()
+                .map(Record::toString)
+                .toArray(String[]::new);
 
-        return map;
+        return StringUtil.spaced(
+                "Dictionary of Type:", StringUtil.typeName(values.getFirst()),
+                "->", StringUtil.commas(entriesArray)
+        );
     }
 
     /**

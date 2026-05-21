@@ -10,6 +10,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public final class Util {
     };
 
     /**
-     * Safe getter for a non-null value. Returns the value if it exists, and throws an exception if it doesn't.
+     * Safe getter for a non-null value. Returns the value if it exists, or throws an exception if it doesn't.
      *
      * @param value The value.
      * @return The same value, if it exists. Throws an exception if not.
@@ -52,12 +53,8 @@ public final class Util {
         return Optional.of(value).orElseThrow();
     }
 
-    public static <T> T getOrDefault(final T value, final T defaultValue) {
-        return Optional.ofNullable(value).orElse(defaultValue);
-    }
-
     /**
-     * Safe getter for a conditional value. Returns the value if the condition is met, and throws an exception if the condition
+     * Safe getter for a conditional value. Returns the value if the condition is met, or throws an exception if the condition
      * is not met.
      *
      * <p> This is similar to {@link Util#get(Object)}, but it is used for conditions *other* than whether
@@ -72,6 +69,19 @@ public final class Util {
      */
     public static <T, X extends Throwable> T get(final boolean condition, final @NonNull T value, final X exception) {
         return condition ? value : elseThrow(exception);
+    }
+
+    /**
+     * Safe getter for a potentially null value. Returns the value if it exists, or returns a default value if the intended
+     * value does not exist.
+     *
+     * @param value The value.
+     * @param defaultValue The default value.
+     * @return The same value, if it exists. Returns the default value if the intended value doesn't exist.
+     * @param <T> The type.
+     */
+    public static <T> T getOrDefault(final @Nullable T value, final @NonNull T defaultValue) {
+        return Optional.ofNullable(value).orElse(defaultValue);
     }
 
     /**
