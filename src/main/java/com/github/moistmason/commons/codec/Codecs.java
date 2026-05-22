@@ -2,7 +2,6 @@ package com.github.moistmason.commons.codec;
 
 import com.github.moistmason.commons.Util;
 import com.github.moistmason.commons.type.Dictionary;
-import com.mojang.datafixers.util.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -10,13 +9,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Helper methods and fields for codecs. A {@link Codec} is an object defined in Mojang's DataFixerUpper library that
- * helps serialize data between Java and JSON/NBT formats.
+ * Contains codec types not found in the base DataFixerUpper library.
  *
  * @author moist-mason
  */
@@ -27,6 +26,17 @@ public final class Codecs {
 
     /** A codec for a path. */
     public static final Codec<Path> PATH = Codec.STRING.comapFlatMap(Codecs::checkPath, Path::toString);
+
+    /**
+     * Codec representation of a {@link Dictionary}.
+     *
+     * @param valueCodec The codec of the dictionary's value type.
+     * @return The codec.
+     * @param <T> The value type.
+     */
+    public static <T> Codec<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
+        return Codec.unboundedMap(Codec.STRING, valueCodec).xmap(Dictionary::fromMap, Dictionary::toMap);
+    }
 
     /**
      * Checks if the input string is a legitimate URL address.
@@ -56,218 +66,73 @@ public final class Codecs {
         }
     }
 
-    private static <T> DataResult<Map<String, T>> checkMapFromDictionary(final Dictionary<T> dictionary) {
-        try {
-            return DataResult.success(dictionary.toMap());
-        } catch (final NullPointerException e) {
-            return DataResult.error(() -> "Invalid Dictionary: " + dictionary);
-        }
+    /**
+     * Creates a field component as part of a {@link RecordCodecBuilder}.
+     * @param <O> The type of this field's parent object.
+     * @param <A> The type of this field.
+     * @param codec The codec associated with this field.
+     * @param name The name of the field in the data output.
+     * @param getter The method reference to a getter associated with this field.
+     * @return The {@link RecordCodecBuilder}.
+     */
+    public static <O, A> RecordCodecBuilder<O, A> field(final Codec<A> codec, final String name, final Function<O, A> getter) {
+        return codec.fieldOf(name).forGetter(getter);
     }
 
     /**
-     * Creates a codec for an object with one parameter in its constructor.
-     *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @return The codec.
-     * @param <F1> The first field type.
-     * @param <R> The object type.
+     * Creates an optional field component as part of a {@link RecordCodecBuilder}.
+     * @param <O> The type of this field's parent object.
+     * @param <A> The type of this field.
+     * @param codec The codec associated with this field.
+     * @param name The name of the field in the data output.
+     * @param getter The method reference to a getter associated with this field.
+     * @return The {@link RecordCodecBuilder}.
      */
-    public static <F1, R> Codec<R> of(final Function<F1, R> function, final RecordCodecBuilder<R, F1> field1) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1
-        ).apply(i, function));
+    public static <O, A> RecordCodecBuilder<O, Optional<A>> optionalField(final Codec<A> codec, final String name, final Function<O, Optional<A>> getter) {
+        return codec.optionalFieldOf(name).forGetter(getter);
     }
 
     /**
-     * Creates a codec for an object with two parameters in its constructor.
+     * Creates a field list component as part of a {@link RecordCodecBuilder}.
      *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <R> The object type.
+     * @param getter The method reference to a getter associated with this field.
+     * @param name The name of the field in the data output.
+     * @param codec The codec associated with this field.
+     * @return The {@link RecordCodecBuilder}.
+     * @param <O> The type of this field's parent object.
+     * @param <A> The type of this field.
      */
-    public static <F1, F2, R> Codec<R> of(
-            final BiFunction<F1, F2, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2
-        ).apply(i, function));
+    public static <O, A> RecordCodecBuilder<O, List<A>> listField(final Function<O, List<A>> getter, final String name, final Codec<A> codec) {
+        return codec.listOf().fieldOf(name).forGetter(getter);
     }
 
     /**
-     * Creates a codec for an object with three parameters in its constructor.
+     * Creates an optional field list component as part of a {@link RecordCodecBuilder}.
      *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @param field3 The field codec entry for the third parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <F3> The third parameter type.
-     * @param <R> The object type.
+     * @param getter The method reference to a getter associated with this field.
+     * @param name The name of the field in the data output.
+     * @param codec The codec associated with this field.
+     * @return The {@link RecordCodecBuilder}.
+     * @param <O> The type of this field's parent object.
+     * @param <A> The type of this field.
      */
-    public static <F1, F2, F3, R> Codec<R> of(
-            final Function3<F1, F2, F3, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2,
-            final RecordCodecBuilder<R, F3> field3
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2,
-                field3
-        ).apply(i, function));
+    public static <O, A> RecordCodecBuilder<O, Optional<List<A>>> optionalListField(final Function<O, Optional<List<A>>> getter, final String name, final Codec<A> codec) {
+        return codec.listOf().optionalFieldOf(name).forGetter(getter);
     }
 
     /**
-     * Creates a codec for an object with four parameters in its constructor.
+     * Creates a map field component as part of a {@link RecordCodecBuilder}.
      *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @param field3 The field codec entry for the third parameter.
-     * @param field4 The field codec entry for the fourth parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <F3> The third parameter type.
-     * @param <F4> The fourth parameter type.
-     * @param <R> The object type.
+     * @param getter The method reference to a getter associated with this field.
+     * @param name The name of the field in the data output.
+     * @param keyCodec The codec associated with this field's key.
+     * @param valueCodec The codec associated with this field's value.
+     * @return The {@link RecordCodecBuilder}.
+     * @param <O> The type of this field's parent object.
+     * @param <K> The type of this field's key.
+     * @param <V> The type of this field's value.
      */
-    public static <F1, F2, F3, F4, R> Codec<R> of(
-            final Function4<F1, F2, F3, F4, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2,
-            final RecordCodecBuilder<R, F3> field3,
-            final RecordCodecBuilder<R, F4> field4
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2,
-                field3,
-                field4
-        ).apply(i, function));
-    }
-
-    /**
-     * Creates a codec for an object with five parameters in its constructor.
-     *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @param field3 The field codec entry for the third parameter.
-     * @param field4 The field codec entry for the fourth parameter.
-     * @param field5 The field codec entry for the fifth parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <F3> The third parameter type.
-     * @param <F4> The fourth parameter type.
-     * @param <F5> The fifth parameter type.
-     * @param <R> The object type.
-     */
-    public static <F1, F2, F3, F4, F5, R> Codec<R> of(
-            final Function5<F1, F2, F3, F4, F5, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2,
-            final RecordCodecBuilder<R, F3> field3,
-            final RecordCodecBuilder<R, F4> field4,
-            final RecordCodecBuilder<R, F5> field5
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2,
-                field3,
-                field4,
-                field5
-        ).apply(i, function));
-    }
-
-    /**
-     * Creates a codec for an object with six parameters in its constructor.
-     *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @param field3 The field codec entry for the third parameter.
-     * @param field4 The field codec entry for the fourth parameter.
-     * @param field5 The field codec entry for the fifth parameter.
-     * @param field6 The field codec entry for the sixth parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <F3> The third parameter type.
-     * @param <F4> The fourth parameter type.
-     * @param <F5> The fifth parameter type.
-     * @param <F6> The sixth parameter type.
-     * @param <R> The object type.
-     */
-    public static <F1, F2, F3, F4, F5, F6, R> Codec<R> of(
-            final Function6<F1, F2, F3, F4, F5, F6, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2,
-            final RecordCodecBuilder<R, F3> field3,
-            final RecordCodecBuilder<R, F4> field4,
-            final RecordCodecBuilder<R, F5> field5,
-            final RecordCodecBuilder<R, F6> field6
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2,
-                field3,
-                field4,
-                field5,
-                field6
-        ).apply(i, function));
-    }
-
-    /**
-     * Creates a codec for an object with seven parameters in its constructor.
-     *
-     * @param function A method reference to an object's constructor (Object::new).
-     * @param field1 The field codec entry for the first parameter.
-     * @param field2 The field codec entry for the second parameter.
-     * @param field3 The field codec entry for the third parameter.
-     * @param field4 The field codec entry for the fourth parameter.
-     * @param field5 The field codec entry for the fifth parameter.
-     * @param field6 The field codec entry for the sixth parameter.
-     * @param field7 The field codec entry for the seventh parameter.
-     * @return The codec.
-     * @param <F1> The first parameter type.
-     * @param <F2> The second parameter type.
-     * @param <F3> The third parameter type.
-     * @param <F4> The fourth parameter type.
-     * @param <F5> The fifth parameter type.
-     * @param <F6> The sixth parameter type.
-     * @param <F7> The seventh parameter type.
-     * @param <R> The object type.
-     */
-    public static <F1, F2, F3, F4, F5, F6, F7, R> Codec<R> of(
-            final Function7<F1, F2, F3, F4, F5, F6, F7, R> function,
-            final RecordCodecBuilder<R, F1> field1,
-            final RecordCodecBuilder<R, F2> field2,
-            final RecordCodecBuilder<R, F3> field3,
-            final RecordCodecBuilder<R, F4> field4,
-            final RecordCodecBuilder<R, F5> field5,
-            final RecordCodecBuilder<R, F6> field6,
-            final RecordCodecBuilder<R, F7> field7
-    ) {
-        return RecordCodecBuilder.create(i -> i.group(
-                field1,
-                field2,
-                field3,
-                field4,
-                field5,
-                field6,
-                field7
-        ).apply(i, function));
+    public static <O, K, V> RecordCodecBuilder<O, Map<K, V>> mapField(final Function<O, Map<K, V>> getter, final String name, final Codec<K> keyCodec, final Codec<V> valueCodec) {
+        return Codec.unboundedMap(keyCodec, valueCodec).fieldOf(name).forGetter(getter);
     }
 }
