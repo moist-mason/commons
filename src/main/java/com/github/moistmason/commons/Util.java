@@ -485,7 +485,7 @@ public final class Util {
      * Factory for exception creation.
      *
      * @param <X> The exception type.
-     * */
+     */
     @FunctionalInterface
     public interface ExceptionFactory<X extends Exception> {
         X create(final String message);
