@@ -52,17 +52,17 @@ public final class CodecProviders {
      * @param <T> The dictionary type.
      */
     public static <T> CodecProvider<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
-        return () -> Codecs.dictionary(valueCodec);
+        return () -> Dictionary.codec(valueCodec);
     }
 
     /**
      * Provides codec builders for an enum class implemented with {@link SerializableEnum}.
      *
-     * @param values The enum constants.
+     * @param enumClass The enum class.
      * @return The provider.
      * @param <E> The enum class type.
      */
-    public static <E extends Enum<E> & SerializableEnum> CodecProvider<E> enumCodec(final E[] values) {
-        return () -> SerializableEnum.codec(values);
+    public static <E extends Enum<E> & SerializableEnum> CodecProvider<E> enumCodec(final Class<E> enumClass) {
+        return () -> SerializableEnum.codec(enumClass);
     }
 }

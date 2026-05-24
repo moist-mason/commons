@@ -219,7 +219,7 @@ public final class StringUtil {
      * @param value The value.
      * @return The simple class name.
      */
-    private static <T> String simpleName(final T value) {
+    public static <T> String simpleName(final T value) {
         return value.getClass().getSimpleName();
     }
 

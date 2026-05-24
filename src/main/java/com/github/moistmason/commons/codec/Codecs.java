@@ -1,7 +1,6 @@
 package com.github.moistmason.commons.codec;
 
 import com.github.moistmason.commons.Util;
-import com.github.moistmason.commons.type.Dictionary;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -27,17 +26,6 @@ public final class Codecs {
 
     /** A codec for a path. */
     public static final Codec<Path> PATH = Codec.STRING.comapFlatMap(Codecs::checkPath, Path::toString);
-
-    /**
-     * Codec representation of a {@link Dictionary}.
-     *
-     * @param <T> The value type.
-     * @param valueCodec The codec of the dictionary's value type.
-     * @return The codec.
-     */
-    public static <T> Codec<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
-        return Codec.unboundedMap(Codec.STRING, valueCodec).xmap(Dictionary::fromMap, Dictionary::toMap);
-    }
 
     /**
      * Checks if the input string is a legitimate URL address.

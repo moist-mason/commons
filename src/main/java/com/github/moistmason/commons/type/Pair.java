@@ -13,15 +13,15 @@ import org.jspecify.annotations.NonNull;
  * @param left The left value.
  * @param right The right value.
  */
-public record Pair<L, R>(L left, R right) {
+public record Pair<L, R>(L left, R right)  {
 
     @Override
     public @NonNull String toString() {
         final String prefix = StringUtil.spaced("Pair",
-                "with Left Type:", StringUtil.typeName(left.getClass()),
-                "and Right Type:", StringUtil.typeName(right.getClass())
+                "with Left Type:", StringUtil.typeName(left),
+                "and Right Type:", StringUtil.typeName(right)
         );
 
-        return prefix + " -> " + StringUtil.brackets(left + ": " + right);
+        return StringUtil.arrowSeparated(prefix, StringUtil.brackets(left + ": " + right));
     }
 }

@@ -2,6 +2,7 @@ package com.github.moistmason.commons.type;
 
 import com.github.moistmason.commons.StringUtil;
 import com.github.moistmason.commons.Util;
+import com.mojang.serialization.Codec;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -23,6 +24,17 @@ import java.util.stream.Stream;
  * @param <T> The dictionary type.
  */
 public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
+
+    /**
+     * Codec representation of a dictionary.
+     *
+     * @param <T> The value type.
+     * @param valueCodec The codec of the dictionary's value type.
+     * @return The codec.
+     */
+    public static <T> Codec<Dictionary<T>> codec(final Codec<T> valueCodec) {
+        return Codec.unboundedMap(Codec.STRING, valueCodec).xmap(Dictionary::fromMap, Dictionary::toMap);
+    }
 
     /** The entry set. Since this is a set, all entries in the dictionary are unique. */
     private final Set<Entry<T>> entries;
@@ -252,14 +264,12 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
 
     @Override
     public String toString() {
+        final String prefix = "Dictionary of Type: " + StringUtil.typeName(values.getFirst());
         final String[] entriesArray = entries.stream()
                 .map(Record::toString)
                 .toArray(String[]::new);
 
-        return StringUtil.spaced(
-                "Dictionary of Type:", StringUtil.typeName(values.getFirst()),
-                "->", StringUtil.commas(entriesArray)
-        );
+        return StringUtil.arrowSeparated(prefix, StringUtil.commas(entriesArray));
     }
 
     /**

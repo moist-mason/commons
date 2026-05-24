@@ -11,7 +11,7 @@ import java.util.function.Function;
 import static com.github.moistmason.commons.Util.URL;
 
 public class IoTests {
-    private static final Path DATA_PATH = Path.of("data");
+    private static final Path DATA_PATH = Path.of("data/io");
     private static final Function<String, Path> PATH = DATA_PATH::resolve;
 
     private static final URL MINECRAFT_JAR_URL = URL.apply("https://piston-data.mojang.com/v1/objects/4e618f09a0c649dde3fdf829df443ce0b8831e65/client.jar");

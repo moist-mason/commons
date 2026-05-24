@@ -22,21 +22,24 @@ import java.util.function.Function;
 public interface SerializableEnum {
 
     /**
-     * The name of an enum constant as it appears in a serialized format (ex. JSON). This value is nullable.
+     * The name of an enum constant as it appears in a serialized format (ex. JSON). This value returns null by default,
+     * which makes the codec serialize an enum into its {@link Enum#name()}. It can be overridden with another preferred string value.
      *
      * @return The name.
      */
-    @Nullable String getSerializedName();
+    default @Nullable String getSerializedName() {
+        return null;
+    };
 
     /**
-     * Creates a codec based on the provided values of an enum class.
+     * Creates a codec based on the provided enum class.
      *
      * @param <E> The enum type.
-     * @param values The values. of the enum.
+     * @param enumClass The enum class.
      * @return The codec.
      */
-    static <E extends Enum<E> & SerializableEnum> EnumCodec<E> codec(final E[] values) {
-        return new EnumCodec<>(enumResolver(values, nameResolver()));
+    static <E extends Enum<E> & SerializableEnum> EnumCodec<E> codec(final Class<E> enumClass) {
+        return new EnumCodec<>(enumResolver(enumClass.getEnumConstants(), nameResolver()));
     }
 
     /**
