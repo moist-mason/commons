@@ -48,6 +48,6 @@ public record Triple<L, M, R>(L left, M middle, R right) {
                 "and Right Type",  StringUtil.typeName(right)
         );
         final String values = StringUtil.commas(left, middle, right);
-        return prefix + " -> " + StringUtil.brackets(values);
+        return StringUtil.arrowSeparated(prefix, StringUtil.brackets(values));
     }
 }

@@ -45,7 +45,7 @@ public final class FileUtil {
      * @param file The file.
      * @throws IOException exception.
      */
-    public static void createFile(final Path file) throws IOException{
+    public static void createFile(final Path file) throws IOException {
         if (!exists(file)) {
             createParentDirectory(file);
             Files.createFile(file);

@@ -33,7 +33,26 @@ public record DoubleRange(double min, double max, double increment) {
     );
 
     /**
-     * Creates a double range whose values are separated by one.
+     * Creates a double range with an increment of one and bounds of the minimum and maximum possible double values.
+     *
+     * @return The range.
+     */
+    public static DoubleRange ofAll() {
+        return ofAll(1);
+    }
+
+    /**
+     * Creates a double range with a definable increment and bounds of the minimum and maximum possible double values.
+     *
+     * @param increment The increment.
+     * @return The range.
+     */
+    public static DoubleRange ofAll(final int increment) {
+        return new DoubleRange(Double.MIN_VALUE, Double.MAX_VALUE, increment);
+    }
+
+    /**
+     * Creates a double range with an increment of one and definable bounds.
      *
      * @param min The minimum value. Inclusive in a stream.
      * @param max The maximum value. Inclusive in a stream.
@@ -44,7 +63,7 @@ public record DoubleRange(double min, double max, double increment) {
     }
 
     /**
-     * Creates a double range whose values are separated by the given increment.
+     * Creates a double range with a definable increment and definable bounds.
      *
      * @param min The minimum value. Inclusive in a stream.
      * @param max The maximum value. Inclusive in a stream.

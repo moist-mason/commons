@@ -33,7 +33,26 @@ public record IntRange(int min, int max, int increment) {
     );
 
     /**
-     * Creates an integer range whose values are separated by one.
+     * Creates an integer range with an increment of one and bounds of the minimum and maximum integer values.
+     *
+     * @return The range.
+     */
+    public static IntRange ofAll() {
+        return ofAll(1);
+    }
+
+    /**
+     * Creates an integer range with a definable increment and bounds of the minimum and maximum integer values.
+     *
+     * @param increment The increment.
+     * @return The range.
+     */
+    public static IntRange ofAll(final int increment) {
+        return new IntRange(Integer.MIN_VALUE, Integer.MAX_VALUE, increment);
+    }
+
+    /**
+     * Creates an integer range with an increment of one and definable bounds.
      *
      * @param min The minimum value. Inclusive in a stream.
      * @param max The maximum value. Inclusive in a stream.
@@ -44,7 +63,7 @@ public record IntRange(int min, int max, int increment) {
     }
 
     /**
-     * Creates an integer range whose values are separated by the given increment.
+     * Creates an integer range with a definable increment and definable bounds.
      *
      * @param min The minimum value. Inclusive in a stream.
      * @param max The maximum value. Inclusive in a stream.
