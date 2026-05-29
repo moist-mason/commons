@@ -27,7 +27,7 @@ public record IntRange(int min, int max, int increment) {
             INT.field("max", IntRange::max),
             INT.field("increment", IntRange::increment)
     ).validate(
-            range -> range.min < range.max
+            range -> range.min >= range.max
                     ? DataResult.error(() -> "Minimum must be less than maximum. Range + " + range)
                     : DataResult.success(range)
     );
@@ -71,7 +71,7 @@ public record IntRange(int min, int max, int increment) {
      * Gets a value from this range's stream that matches the given {@link IntPredicate}.
      *
      * <p> WARNING: This method calls {@code findFirst()} when searching in the stream and doesn't offer too much precision
-     * in getting particular a particular value. This method's use cases are really narrow as a result. </p>
+     * in getting a particular value. This method's use cases are really narrow as a result. </p>
      *
      * <p> Most of the time it'll be easier to call {@link IntRange#getAll(IntPredicate)} and sort through that method's
      * returned array to get the value you want. </p>

@@ -267,7 +267,6 @@ public class Dictionary<T> implements Iterable<Dictionary.Entry<T>> {
         final String[] entriesArray = entries.stream()
                 .map(Record::toString)
                 .toArray(String[]::new);
-
         return StringUtil.arrowSeparated(prefix, StringUtil.commas(entriesArray));
     }
 

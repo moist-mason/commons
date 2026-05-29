@@ -3,7 +3,9 @@ package com.github.moistmason.commons.codec;
 import com.github.moistmason.commons.math.DoubleRange;
 import com.github.moistmason.commons.math.IntRange;
 import com.github.moistmason.commons.type.Dictionary;
+import com.github.moistmason.commons.type.Pair;
 import com.github.moistmason.commons.type.SerializableEnum;
+import com.github.moistmason.commons.type.Triple;
 import com.mojang.serialization.Codec;
 
 import java.net.URL;
@@ -55,20 +57,48 @@ public final class CodecProviders {
     /**
      * Provides codec builders for the given codec.
      *
+     * @param <T> The codec type.
      * @param codec The codec.
      * @return The provider.
-     * @param <T> The codec type.
      */
     public static <T> CodecProvider<T> provider(final Codec<T> codec) {
         return () -> codec;
     }
 
     /**
+     * Provides codec builders for {@link Pair}s.
+     *
+     * @param <L> The left type.
+     * @param <R> The right type.
+     * @param leftCodec The left type's codec.
+     * @param rightCodec The right type's codec.
+     * @return The provider.
+     */
+    public static <L, R> CodecProvider<Pair<L, R>> pair(final Codec<L> leftCodec, final Codec<R> rightCodec) {
+        return () -> Pair.codec(leftCodec, rightCodec);
+    }
+
+    /**
+     * Provides codec builders for {@link Triple}.
+     *
+     * @param <L> The left type.
+     * @param <M> The middle type.
+     * @param <R> The right type.
+     * @param leftCodec The left type's codec.
+     * @param middleCodec The middle type's codec.
+     * @param rightCodec The right type's codec.
+     * @return The provider.
+     */
+    public static <L, M, R> CodecProvider<Triple<L, M, R>> triple(final Codec<L> leftCodec, final Codec<M> middleCodec, final Codec<R> rightCodec) {
+        return () -> Triple.codec(leftCodec, middleCodec, rightCodec);
+    }
+
+    /**
      * Provides codec builders for a {@link Dictionary}.
      *
+     * @param <T> The dictionary type.
      * @param valueCodec The codec of the dictionary's value type.
      * @return The provider.
-     * @param <T> The dictionary type.
      */
     public static <T> CodecProvider<Dictionary<T>> dictionary(final Codec<T> valueCodec) {
         return () -> Dictionary.codec(valueCodec);
@@ -77,9 +107,9 @@ public final class CodecProviders {
     /**
      * Provides codec builders for an enum class implemented with {@link SerializableEnum}.
      *
+     * @param <E> The enum class type.
      * @param enumClass The enum class.
      * @return The provider.
-     * @param <E> The enum class type.
      */
     public static <E extends Enum<E> & SerializableEnum> CodecProvider<E> enumCodec(final Class<E> enumClass) {
         return () -> SerializableEnum.codec(enumClass);

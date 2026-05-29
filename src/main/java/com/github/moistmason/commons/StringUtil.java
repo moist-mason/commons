@@ -269,7 +269,7 @@ public final class StringUtil {
      * @return The formatted string.
      */
     private static <K, V> String mapEntries(final Map<K, V> map) {
-        String[] entries = map.entrySet().stream()
+        final String[] entries = map.entrySet().stream()
                 .map(e -> spaced(
                         e.getKey().toString() + ":", 
                         e.getValue().toString()))
